@@ -1,0 +1,21 @@
+{
+  "name": "wavefront",
+  "version": "1.0.0",
+  "description": "Wavefront - High-speed circle reflex & working memory kinetic arcade game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "game",
+    "canvas",
+    "reflex",
+    "working-memory",
+    "arcade",
+    "kinetic",
+    "html5-game",
+    "cyberpunk"
+  ],
+  "author": "",
+  "license": "ISC"
+}

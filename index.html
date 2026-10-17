@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wavefront - Circle &amp; Working Memory Kinetic Game</title>
+  <link rel="stylesheet" href="Code/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-default">
+  <div id="game-container">
+    <!-- Canvas for gameplay and dynamic background rendering -->
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="game-canvas"></canvas>
+
+    <!-- SCENE 1: MAIN MENU -->
+    <div id="scene-menu" class="scene active">
+      <div class="menu-box glass-panel">
+        <div class="glitch-title" data-text="WAVEFRONT">WAVEFRONT</div>
+        <p class="subtitle">A Reflex &amp; Working Memory Kinetic Odyssey</p>
+
+        <div class="menu-actions">
+          <button id="btn-play" class="btn btn-primary pulse">PLAY GAME</button>
+          <button id="btn-cheat-sheet" class="btn btn-secondary">MEMORY BRIEFING</button>
+          <button id="btn-settings" class="btn btn-secondary">AUDIO &amp; CONTROLS</button>
+        </div>
+
+        <div class="high-scores-preview">
+          <span class="high-score-label">BEST ENDLESS SCORE:</span>
+          <span id="menu-high-score" class="high-score-val">0</span>
+        </div>
+
+        <!-- Music Credits Footer (from Credits.txt) -->
+        <div class="credits-footer">
+          <div class="credits-header">&#9835; SOUNDTRACK CREDITS</div>
+          <div class="credit-line">
+            <strong>Heroism</strong> by MaxKoMusic | <a href="https://maxkomusic.com/" target="_blank" rel="noopener">maxkomusic.com</a> (CC BY-SA 3.0 via <a href="https://www.chosic.com/free-music/all/" target="_blank" rel="noopener">Chosic</a>)
+          </div>
+          <div class="credit-line">
+            <strong>Extreme Sport Trap | PISTA</strong> by Alex-Productions | <a href="https://onsound.eu/" target="_blank" rel="noopener">onsound.eu</a> (CC BY 3.0 via <a href="https://www.chosic.com/free-music/all/" target="_blank" rel="noopener">Chosic</a>)
+          </div>
+          <div class="credit-line">
+            <strong>Under The Sun</strong> by Keys of Moon | <a href="https://soundcloud.com/keysofmoon" target="_blank" rel="noopener">SoundCloud</a> (CC BY 4.0 via <a href="https://www.chosic.com/free-music/all/" target="_blank" rel="noopener">Chosic</a>)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 2: MODE SELECT & DIFFICULTY -->
+    <div id="scene-mode" class="scene hidden">
+      <div class="mode-box glass-panel">
+        <h2 class="section-title">SELECT MISSION TYPE</h2>
+
+        <div class="mode-cards">
+          <!-- Endless Card -->
+          <div class="mode-card" id="card-endless">
+            <div class="mode-icon">&#8734;</div>
+            <h3>ENDLESS WEAVE</h3>
+            <p>Surf the central crescent slider through escalating grids of Cascade, Scissor, and Boulder patterns. Jump over rolling crescent boulders!</p>
+            <button class="btn btn-mode" id="btn-select-endless">CHOOSE ENDLESS</button>
+          </div>
+
+          <!-- Adventure Card -->
+          <div class="mode-card" id="card-adventure">
+            <div class="mode-icon">&#x25C7;</div>
+            <h3>ADVENTURE PATH</h3>
+            <p>Conquer 8 unique geometric track shapes (Crescent Basin, Orbit Ring, Twin Dip, Infinity Weave, Spiral Nebula, Triple Crest, Diamond Warp, Cosmic Vortex) from start to finish.</p>
+            <button class="btn btn-mode" id="btn-select-adventure">CHOOSE ADVENTURE</button>
+          </div>
+        </div>
+
+        <!-- Difficulty Selection (Active when Endless chosen) -->
+        <div id="difficulty-panel" class="difficulty-panel hidden">
+          <h3 class="diff-title">SELECT ENDLESS DIFFICULTY</h3>
+          <p class="diff-subtitle">Determines game arena theme, pattern scaling, and speed multipliers</p>
+
+          <div class="diff-grid">
+            <button class="diff-btn diff-easy" data-diff="easy">
+              <span class="diff-name">EASY</span>
+              <span class="diff-mult">0.8x Speed &bull; 2-4 Balls</span>
+              <span class="diff-theme">Emerald Basin</span>
+            </button>
+            <button class="diff-btn diff-normal active" data-diff="normal">
+              <span class="diff-name">NORMAL</span>
+              <span class="diff-mult">1.0x Speed &bull; Standard Scaling</span>
+              <span class="diff-theme">Amber Surge</span>
+            </button>
+            <button class="diff-btn diff-hard" data-diff="hard">
+              <span class="diff-name">HARD</span>
+              <span class="diff-mult">1.3x Speed &bull; Dense Grids</span>
+              <span class="diff-theme">Crimson Pulse</span>
+            </button>
+            <button class="diff-btn diff-nightmare" data-diff="nightmare">
+              <span class="diff-name">NIGHTMARE</span>
+              <span class="diff-mult">1.6x Speed &bull; Extreme Velocity</span>
+              <span class="diff-theme">Void &amp; Magma Cracks</span>
+            </button>
+          </div>
+
+          <div class="diff-launch-row">
+            <button id="btn-launch-endless" class="btn btn-primary pulse">LAUNCH ENDLESS</button>
+          </div>
+        </div>
+
+        <!-- Adventure Level Selection (8 Stages) -->
+        <div id="adventure-panel" class="adventure-panel hidden">
+          <h3 class="diff-title">ADVENTURE STAGES (8 MISSIONS)</h3>
+          <div class="stage-grid">
+            <button class="stage-btn active" data-stage="1">
+              <span class="stage-num">STAGE 01</span>
+              <span class="stage-name">Crescent Basin</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="2">
+              <span class="stage-num">STAGE 02</span>
+              <span class="stage-name">Orbital Ring</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="3">
+              <span class="stage-num">STAGE 03</span>
+              <span class="stage-name">Twin Dip Wave</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="4">
+              <span class="stage-num">STAGE 04</span>
+              <span class="stage-name">Infinity Weave</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="5">
+              <span class="stage-num">STAGE 05</span>
+              <span class="stage-name">Spiral Nebula</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="6">
+              <span class="stage-num">STAGE 06</span>
+              <span class="stage-name">Triple Crest Apex</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="7">
+              <span class="stage-num">STAGE 07</span>
+              <span class="stage-name">Diamond Perimeter</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+            <button class="stage-btn" data-stage="8">
+              <span class="stage-num">STAGE 08</span>
+              <span class="stage-name">Cosmic Vortex</span>
+              <span class="stage-status">&#10003; UNLOCKED</span>
+            </button>
+          </div>
+          <div class="diff-launch-row">
+            <button id="btn-launch-adventure" class="btn btn-primary pulse">START MISSION</button>
+          </div>
+        </div>
+
+        <div class="mode-nav-back">
+          <button id="btn-back-to-menu" class="btn btn-secondary">&larr; BACK TO MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: GAMEPLAY HUD & OVERLAYS -->
+    <div id="scene-game" class="scene hidden">
+      <!-- HUD Header -->
+      <div id="game-hud">
+        <div class="hud-left">
+          <div class="hud-item">
+            <span class="hud-label">MODE:</span>
+            <span id="hud-mode-text" class="hud-value">ENDLESS (NORMAL)</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">PATTERN:</span>
+            <span id="hud-pattern-text" class="hud-value">CASCADE</span>
+          </div>
+        </div>
+
+        <div class="hud-center">
+          <div class="hud-score-box">
+            <span class="hud-label" id="hud-score-label">SCORE</span>
+            <span id="hud-score" class="hud-score-value">0</span>
+          </div>
+          <div id="hud-progress-container" class="hud-progress-container hidden">
+            <div class="progress-bar-bg">
+              <div id="hud-progress-fill" class="progress-bar-fill"></div>
+            </div>
+            <span id="hud-progress-text">DISTANCE TO FINISH: 0%</span>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <!-- Active Powerup Display -->
+          <div id="hud-powerup-badge" class="hud-badge hidden">
+            <span id="hud-powerup-icon">&bull;</span>
+            <span id="hud-powerup-text">INVULNERABLE</span>
+            <span id="hud-powerup-timer">5.0s</span>
+          </div>
+
+          <!-- Jump Button for Mouse/Touch -->
+          <button id="btn-jump-action" class="hud-btn hud-jump-btn" title="Jump Over Rolling Crescent Boulder">&#11014; JUMP [SPACE]</button>
+          <button id="btn-toggle-cheat" class="hud-btn" title="View Memory Cheat Sheet">&#128065; CHEAT SHEET</button>
+          <button id="btn-pause-game" class="hud-btn" title="Pause Game">&#10074;&#10074; PAUSE</button>
+        </div>
+      </div>
+
+      <!-- Warning Banners -->
+      <div id="inversion-warning" class="screen-flash-banner hidden">
+        &#9888; SENSORY INVERSION ACTIVE! CONTROLS REVERSED! &#9888;
+      </div>
+
+      <div id="rolling-boulder-warning" class="screen-flash-banner boulder-warning hidden">
+        &#9888; ROLLING BOULDER INCOMING! JUMP OVER IT [SPACE / UP]! &#9888;
+      </div>
+    </div>
+
+    <!-- MEMORY BRIEFING / CHEAT SHEET MODAL -->
+    <div id="modal-cheat-sheet" class="modal hidden">
+      <div class="modal-content glass-panel memory-briefing-box">
+        <h2 class="briefing-title">MEMORY BRIEFING &bull; COGNITIVE PROTOCOL</h2>
+        <p class="briefing-desc">
+          Before entering the weave, commit these color-texture signatures to memory. 
+          <strong>Warning:</strong> Intuitive video game habits will trick you—Solid vs Striped defines friend vs foe!
+        </p>
+
+        <div class="cheat-grid">
+          <!-- Player -->
+          <div class="cheat-item">
+            <div class="cheat-orb player-orb"></div>
+            <div class="cheat-info">
+              <h4>BLUE CIRCLE</h4>
+              <span class="badge badge-player">YOU (THE PLAYER)</span>
+              <p>Move along track with <strong>Left/Right Arrows</strong> or <strong>A/D</strong>. Press <strong>Spacebar</strong> or <strong>Up Arrow</strong> to <strong>JUMP</strong> over rolling track hazards!</p>
+            </div>
+          </div>
+
+          <!-- Avoid (Striped Red) -->
+          <div class="cheat-item danger">
+            <div class="cheat-orb striped-red-orb"></div>
+            <div class="cheat-info">
+              <h4>STRIPED RED</h4>
+              <span class="badge badge-hazard">&#9888; DEADLY HAZARD</span>
+              <p><strong>AVOID AT ALL COSTS!</strong> Collision is instant game over unless Invulnerable. Includes falling orbs and rolling crescent boulders!</p>
+            </div>
+          </div>
+
+          <!-- Invulnerable (Solid Red) -->
+          <div class="cheat-item benefit">
+            <div class="cheat-orb solid-red-orb"></div>
+            <div class="cheat-info">
+              <h4>SOLID RED</h4>
+              <span class="badge badge-powerup">&#10022; INVULNERABILITY (GOOD)</span>
+              <p>Grants <strong>5s absolute shield</strong>! You can safely smash through hazard balls and earn bonus points.</p>
+            </div>
+          </div>
+
+          <!-- Chrono Sphere (Solid Green) -->
+          <div class="cheat-item benefit">
+            <div class="cheat-orb solid-green-orb"></div>
+            <div class="cheat-info">
+              <h4>SOLID GREEN</h4>
+              <span class="badge badge-powerup">&#9201; CHRONO MATRIX (GOOD)</span>
+              <p><strong>Slows all incoming hazard balls to 35% speed</strong> for 6s, opening wide surfing corridors.</p>
+            </div>
+          </div>
+
+          <!-- Inversion Trap (Striped Green) -->
+          <div class="cheat-item danger">
+            <div class="cheat-orb striped-green-orb"></div>
+            <div class="cheat-info">
+              <h4>STRIPED GREEN</h4>
+              <span class="badge badge-trap">&#9760; SENSORY INVERSION (BAD TRAP!)</span>
+              <p><strong>DO NOT TOUCH!</strong> Inverts movement controls (Left is Right) and distorts spatial vision for 5s!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="briefing-rule-summary">
+          <div class="rule-chip"><span>SOLID = BENEFICIAL</span></div>
+          <div class="rule-chip danger-chip"><span>STRIPED = HAZARDOUS / TRAP</span></div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="btn-close-cheat" class="btn btn-primary pulse">I HAVE MEMORIZED IT &bull; READY</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAUSE MODAL -->
+    <div id="modal-pause" class="modal hidden">
+      <div class="modal-content glass-panel pause-box">
+        <h2>GAME PAUSED</h2>
+        <div class="pause-actions">
+          <button id="btn-resume-game" class="btn btn-primary">RESUME</button>
+          <button id="btn-pause-cheat" class="btn btn-secondary">VIEW CHEAT SHEET</button>
+          <button id="btn-restart-game" class="btn btn-secondary">RESTART LEVEL</button>
+          <button id="btn-quit-to-menu" class="btn btn-secondary">QUIT TO MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="modal-gameover" class="modal hidden">
+      <div class="modal-content glass-panel gameover-box">
+        <h2 class="gameover-title">&#9760; WAVEFRONT COLLAPSED</h2>
+        <p id="gameover-cause">You collided with a Striped Red hazard ball.</p>
+
+        <div class="stats-summary">
+          <div class="stat-row">
+            <span>FINAL SCORE:</span>
+            <span id="go-score" class="stat-highlight">0</span>
+          </div>
+          <div class="stat-row">
+            <span>TIME SURVIVED:</span>
+            <span id="go-time">00:00</span>
+          </div>
+          <div class="stat-row">
+            <span>HAZARDS DODGED:</span>
+            <span id="go-dodged">0</span>
+          </div>
+          <div class="stat-row">
+            <span>POWER-UPS COLLECTED:</span>
+            <span id="go-powerups">0</span>
+          </div>
+        </div>
+
+        <div class="gameover-actions">
+          <button id="btn-play-again" class="btn btn-primary pulse">TRY AGAIN</button>
+          <button id="btn-go-mode-select" class="btn btn-secondary">MODE SELECT</button>
+          <button id="btn-go-menu" class="btn btn-secondary">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVENTURE VICTORY MODAL -->
+    <div id="modal-victory" class="modal hidden">
+      <div class="modal-content glass-panel victory-box">
+        <h2 class="victory-title">&#10024; STAGE CLEARED! &#10024;</h2>
+        <p id="victory-stage-desc">You successfully reached the finish line without being shattered!</p>
+
+        <div class="stats-summary">
+          <div class="stat-row">
+            <span>STAGE SCORE:</span>
+            <span id="vic-score" class="stat-highlight">0</span>
+          </div>
+          <div class="stat-row">
+            <span>COMPLETION TIME:</span>
+            <span id="vic-time">00:00</span>
+          </div>
+        </div>
+
+        <div class="victory-actions">
+          <button id="btn-next-stage" class="btn btn-primary pulse">NEXT STAGE</button>
+          <button id="btn-vic-replay" class="btn btn-secondary">REPLAY STAGE</button>
+          <button id="btn-vic-menu" class="btn btn-secondary">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS & AUDIO MODAL -->
+    <div id="modal-settings" class="modal hidden">
+      <div class="modal-content glass-panel settings-box">
+        <h2>AUDIO &amp; SYSTEM SETTINGS</h2>
+        
+        <div class="settings-group">
+          <h3>MUSIC SOUNDTRACK ASSIGNMENTS</h3>
+          <div class="music-assignment-card">
+            <div class="mac-row">
+              <strong>Track 1: Extreme Sport Trap (PISTA)</strong>
+              <span class="mac-tag tag-game">Endless Action</span>
+              <p>Punchy, high-tempo arcade trap beat. Fits reflex dodging.</p>
+            </div>
+            <div class="mac-row">
+              <strong>Track 2: Under The Sun</strong>
+              <span class="mac-tag tag-menu">Menu &amp; Memory</span>
+              <p>Mellow, acoustic &amp; ambient chillout. Lets you calmly memorize the signatures.</p>
+            </div>
+            <div class="mac-row">
+              <strong>Track 3: Heroism Epic Hybrid</strong>
+              <span class="mac-tag tag-epic">Adventure &amp; Nightmare</span>
+              <p>Dramatic orchestral brass and drums. High stakes and tension.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="slider-control">
+            <label for="music-vol">Music Volume: <span id="music-vol-num">70%</span></label>
+            <input type="range" id="music-vol" min="0" max="100" value="70">
+          </div>
+          <div class="slider-control">
+            <label for="sfx-vol">Sound Effects: <span id="sfx-vol-num">80%</span></label>
+            <input type="range" id="sfx-vol" min="0" max="100" value="80">
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="btn-close-settings" class="btn btn-primary">SAVE &amp; CLOSE</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Game Scripts -->
+  <script src="Code/audio.js"></script>
+  <script src="Code/patterns.js"></script>
+  <script src="Code/levels.js"></script>
+  <script src="Code/game.js"></script>
+</body>
+</html>
