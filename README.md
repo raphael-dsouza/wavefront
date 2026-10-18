@@ -10,6 +10,12 @@
 
 ---
 
+
+## Important Note
+
+This game has been created with AI, I have only put it into a repo
+
+
 ## 🚀 Quick Start
 
 ```bash
